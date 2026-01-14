@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>BusyBox Terminal v1.13.4</title>
+    <style>
+        body {
+            background-color: #0c0c0c;
+            color: #00ff00;
+            font-family: 'Consolas', 'Monaco', monospace;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+
+        #output {
+            flex-grow: 1;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            margin-bottom: 10px;
+            text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+        }
+
+        .input-line {
+            display: flex;
+            align-items: center;
+        }
+
+        .prompt {
+            color: #00ff00;
+            margin-right: 10px;
+            white-space: nowrap;
+        }
+
+        #command-input {
+            background: transparent;
+            border: none;
+            color: #00ff00;
+            font-family: inherit;
+            font-size: inherit;
+            outline: none;
+            width: 100%;
+        }
+
+        .system-msg { color: #888; font-style: italic; }
+        .error-msg { color: #ff0000; }
+        .success-msg { color: #ffff00; }
+
+        /* Scrollbar stilizzata */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0c0c0c; }
+        ::-webkit-scrollbar-thumb { background: #004400; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+<div id="output">BusyBox v1.13.4 (2026-01-14 23:23:27) built-in shell (ash)
+Enter 'help' for a list of built-in commands.
+
+</div>
+
+<div class="input-line">
+    <span class="prompt">root@cyber-host:/#</span>
+    <input type="text" id="command-input" autofocus spellcheck="false">
+</div>
+
+<script>
+    const output = document.getElementById('output');
+    const input = document.getElementById('command-input');
+
+    // Comandi disponibili
+    const commands = {
+        'help': "Available commands: help, ls, clear, whoami, date, status, hack",
+        'ls': "bin/  etc/  home/  root/  usr/  var/  secret_data.txt",
+        'whoami': "root (privileged user)",
+        'date': () => new Date().toLocaleString(),
+        'status': "CPU: 12% | RAM: 450MB/16GB | Uplink: Active",
+        'clear': "CLEAR",
+        'hack': () => {
+            startFakeHack();
+            return "Initializing breach protocol...";
+        }
+    };
+
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            const fullCommand = input.value.trim().toLowerCase();
+            const cmd = fullCommand.split(' ')[0];
+            
+            // Log del comando nel terminale
+            addLine(`<span class="prompt">root@cyber-host:/#</span> ${input.value}`);
+
+            if (cmd === 'clear') {
+                output.innerHTML = "";
+            } else if (commands[cmd]) {
+                const response = typeof commands[cmd] === 'function' ? commands[cmd]() : commands[cmd];
+                addLine(response);
+            } else if (cmd !== "") {
+                addLine(`<span class="error-msg">sh: ${cmd}: command not found</span>`);
+            }
+
+            input.value = "";
+            window.scrollTo(0, document.body.scrollHeight);
+        }
+    });
+
+    function addLine(text) {
+        const div = document.createElement('div');
+        div.innerHTML = text;
+        output.appendChild(div);
+        output.scrollTop = output.scrollHeight;
+    }
+
+    function startFakeHack() {
+        let i = 0;
+        const lines = [
+            "Connecting to proxy...", "Bypassing firewall...", 
+            "Injecting SQL payload...", "Accessing database...", 
+            "DECRYPTING: [##########] 100%", "ACCESS GRANTED."
+        ];
+        const interval = setInterval(() => {
+            addLine(`<span class="success-msg">${lines[i]}</span>`);
+            i++;
+            if (i >= lines.length) clearInterval(interval);
+        }, 600);
+    }
+
+    // Mantieni il focus sull'input
+    document.body.addEventListener('click', () => input.focus());
+</script>
+
+</body>
+</html>
